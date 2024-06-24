@@ -33,6 +33,11 @@ public class UserRepository implements IUserRepo {
         return userDAO.getUserById(id);
     }
 
+    @Override
+    public User getUserByEmail(String email) {
+        return userDAO.getUserByEmail(email);
+    }
+
 
     @Override
     public User createUser(User user) {

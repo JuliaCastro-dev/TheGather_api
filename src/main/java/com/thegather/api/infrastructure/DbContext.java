@@ -6,13 +6,13 @@ import java.sql.SQLException;
 
 public class DbContext {
     public static Connection getConnection() {
-        Connection connection = null;
         try {
-            connection = DriverManager.getConnection("jdbc:oracle:thin:@oracle.fiap.com.br:1521:orcl", "rm96828", "Julia24");
+            Connection connection = DriverManager.getConnection("jdbc:oracle:thin:@oracle.fiap.com.br:1521:orcl", "rm96828", "Julia24");
+            System.out.println("Connected to Database.");
+            return connection;
         } catch (SQLException e) {
-
-            e.printStackTrace();
+            throw new RuntimeException("Cannot connect to database", e.getCause());
         }
-        return connection;
+
     }
 }

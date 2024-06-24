@@ -19,7 +19,6 @@ public class UserController {
     }
 
     Gson gson = new Gson();
-
     @GetMapping(value = "/users")
     public ResponseEntity<String> getAllUsers() {
         List<User> users = userService.getAllUsers();

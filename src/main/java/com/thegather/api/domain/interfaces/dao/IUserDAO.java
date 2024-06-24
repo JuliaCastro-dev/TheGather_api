@@ -10,4 +10,5 @@ public interface IUserDAO {
     List<User> getAllUsers();
     int updateUser(User user);
     User getUserById(long id);
+    User getUserByEmail(String email);
 }

@@ -10,5 +10,6 @@ public interface IUserRepo {
     List<User> getAllUsers();
     int updateUser(User user);
     User getUserById(long id);
+    User getUserByEmail(String email);
 
 }

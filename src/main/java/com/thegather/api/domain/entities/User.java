@@ -34,7 +34,7 @@ public class User {
     @Column(nullable = false, name = "OFFICE")
     public int office;
 
-    @Column(nullable = false, name = "COMPANY_ID")
+    @Column(name = "COMPANY_ID")
     public int company_id;
 
     public Long getId() {
