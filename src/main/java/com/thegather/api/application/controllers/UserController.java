@@ -1,6 +1,7 @@
 package com.thegather.api.application.controllers;
 
 import com.google.gson.Gson;
+import com.thegather.api.domain.entities.LoginCredentials;
 import com.thegather.api.domain.entities.User;
 import com.thegather.api.domain.interfaces.services.IUserService;
 import jakarta.validation.Valid;

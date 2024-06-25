@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/auth")
+@RestController("auth")
 public class AuthController {
     private final IUserService userService;
 
@@ -21,12 +20,20 @@ public class AuthController {
 
     Gson gson = new Gson();
 
-    @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginCredentials credentials) {
-        User user = userService.getUserByEmail(credentials.getEmail());
-        if (user != null && user.getPassword().equals(credentials.getPassword())) {
+    @PostMapping(value = "/login")
+    public ResponseEntity<String> login(@RequestBody LoginCredentials credentials) {
+        User user = userService.getUserByEmail(credentials.email);
+
+        if (user == null) {
+            System.out.println("User not found for email: " + credentials.email);
+            return ResponseEntity.badRequest().body("Invalid username or password");
+        }
+
+        if (user != null && user.getPassword().equals(credentials.password)) {
+            System.out.println("Achou usuário para login");
             return ResponseEntity.ok(gson.toJson(user));
         } else {
+            System.out.println("Senha errada");
             return ResponseEntity.badRequest().body("Invalid username or password");
         }
     }

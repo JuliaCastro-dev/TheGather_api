@@ -10,6 +10,9 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.sql.Types.NULL;
+
 @Component
 public class UserDAO implements IUserDAO {
     @Override
@@ -20,10 +23,7 @@ public class UserDAO implements IUserDAO {
 
         try {
             connection = DbContext.getConnection();
-
-            // Assuming the table has an auto-incrementing ID column named 'ID'
             String sql = "INSERT INTO USERS (NAME, EMAIL, PASSWORD, ADDRESS, PHONE, CEP, CPF, OFFICE, COMPANY_ID) VALUES (?,?,?,?,?,?,?,?,?)";
-
             statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, user.getName());
             statement.setString(2, user.getEmail());
@@ -73,16 +73,16 @@ public class UserDAO implements IUserDAO {
             statement = connection.createStatement();
             resultSet = statement.executeQuery("SELECT * FROM USERS");
             while (resultSet.next()) {
-                User user = new User();
-                user.setName(resultSet.getString("NAME"));
-                user.setEmail(resultSet.getString("EMAIL"));
-                user.setPassword(resultSet.getString("PASSWORD"));
-                user.setAddress(resultSet.getString("ADDRESS"));
-                user.setPhone(resultSet.getString("PHONE"));
-                user.setCEP(resultSet.getString("CEP"));
-                user.setCPF(resultSet.getString("CPF"));
-                user.setOffice(resultSet.getInt("OFFICE"));
-                user.setCompany_id(resultSet.getInt("COMPANY_ID"));
+                User user = new User(resultSet.getLong("ID"),
+                        resultSet.getString("NAME"),
+                        resultSet.getString("EMAIL"),
+                        resultSet.getString("PASSWORD"),
+                        resultSet.getString("ADDRESS"),
+                        resultSet.getString("PHONE"),
+                        resultSet.getString("CEP"),
+                        resultSet.getString("CPF"),
+                        resultSet.getInt("OFFICE"),
+                        resultSet.getInt("COMPANY_ID"));
                 users.add(user);
             }
 
@@ -90,8 +90,9 @@ public class UserDAO implements IUserDAO {
         catch (SQLException e) {
             e.printStackTrace();
 
+        }finally {
+            return users;
         }
-        return users;
     }
 
     @Override
@@ -140,23 +141,23 @@ public class UserDAO implements IUserDAO {
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
-        User user = new User();
+        User user = null;
         try {
             connection = DbContext.getConnection();
             statement = connection.prepareStatement("SELECT * FROM USERS");
             resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                user.setId(resultSet.getLong("ID"));
-                user.setName(resultSet.getString("NAME"));
-                user.setEmail(resultSet.getString("EMAIL"));
-                user.setPassword(resultSet.getString("PASSWORD"));
-                user.setAddress(resultSet.getString("ADDRESS"));
-                user.setPhone(resultSet.getString("PHONE"));
-                user.setCEP(resultSet.getString("CEP"));
-                user.setCPF(resultSet.getString("CPF"));
-                user.setOffice(resultSet.getInt("OFFICE"));
-                user.setCompany_id(resultSet.getInt("COMPANY_ID"));
+                user =   new User(resultSet.getLong("ID"),
+                        resultSet.getString("NAME"),
+                        resultSet.getString("EMAIL"),
+                        resultSet.getString("PASSWORD"),
+                        resultSet.getString("ADDRESS"),
+                        resultSet.getString("PHONE"),
+                        resultSet.getString("CEP"),
+                        resultSet.getString("CPF"),
+                        resultSet.getInt("OFFICE"),
+                        resultSet.getInt("COMPANY_ID"));
             }
 
         }
@@ -167,29 +168,29 @@ public class UserDAO implements IUserDAO {
     }
 
     public User getUserByEmail(String email) {
-        User user = new User();
-        try (Connection connection = DbContext.getConnection();
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM USERS WHERE EMAIL = ? ");
-             ResultSet resultSet = statement.executeQuery()) {
-
-            statement.setString(1, email); //
-
+        User user = null;
+        try {
+            Connection connection = DbContext.getConnection();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM USERS WHERE EMAIL = " + email);
             if (resultSet.next()) {
-                user.setId(resultSet.getLong("ID"));
-                user.setName(resultSet.getString("NAME"));
-                user.setEmail(resultSet.getString("EMAIL"));
-                user.setPassword(resultSet.getString("PASSWORD")); // Remember to secure password storage!
-                user.setAddress(resultSet.getString("ADDRESS"));
-                user.setPhone(resultSet.getString("PHONE"));
-                user.setCEP(resultSet.getString("CEP"));
-                user.setCPF(resultSet.getString("CPF"));
-                user.setOffice(resultSet.getInt("OFFICE"));
-                user.setCompany_id(resultSet.getInt("COMPANY_ID"));
+                user =   new User(resultSet.getLong("ID"),
+                        resultSet.getString("NAME"),
+                        resultSet.getString("EMAIL"),
+                        resultSet.getString("PASSWORD"),
+                        resultSet.getString("ADDRESS"),
+                        resultSet.getString("PHONE"),
+                        resultSet.getString("CEP"),
+                        resultSet.getString("CPF"),
+                        resultSet.getInt("OFFICE"),
+                        resultSet.getInt("COMPANY_ID"));
             }
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Cannot get a user with this email", e.getCause());
+        }finally {
+            return user;
         }
-        return user;
     }
 
     @Override

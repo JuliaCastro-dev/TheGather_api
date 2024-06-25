@@ -5,37 +5,38 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "USERS")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    public Long id;
+    private Long id;
 
     @Column(nullable = false, length = 255, name = "NAME")
-    public String name;
+    private String name;
 
     @Column(nullable = false, length = 255, name = "EMAIL")
-    public String email;
+    private String email;
 
     @Column(nullable = false, length = 255, name = "PASSWORD")
-    public String password;
+    private String password;
 
     @Column(length = 255, name = "ADDRESS")
-    public String address;
+    private String address;
 
     @Column(nullable = false, length = 20, name = "PHONE")
-    public String phone;
+    private String phone;
 
     @Column(nullable = false, length = 8, name = "CEP")
-    public String CEP;
+    private String CEP;
 
     @Column(nullable = false, length = 11, name = "CPF")
-    public String CPF;
+    private String CPF;
 
     @Column(nullable = false, name = "OFFICE")
-    public int office;
+    private int office;
 
     @Column(name = "COMPANY_ID")
-    public int company_id;
+    private int company_id;
 
     public Long getId() {
         return id;
@@ -116,4 +117,17 @@ public class User {
     public void setCompany_id(int company_id) {
         this.company_id = company_id;
     }
+    public User(Long id, String name, String email, String password, String address, String phone, String CEP, String CPF, int office, int company_id) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.address = address;
+        this.phone = phone;
+        this.CEP = CEP;
+        this.CPF = CPF;
+        this.office = office;
+        this.company_id = company_id;
+    }
+
 }
