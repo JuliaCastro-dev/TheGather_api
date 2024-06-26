@@ -3,36 +3,45 @@ package com.thegather.api.application.controllers;
 import com.google.gson.Gson;
 import com.thegather.api.domain.entities.Company;
 import com.thegather.api.domain.interfaces.services.ICompanyService;
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
-@RestController("companies")
+@RestController
+@RequestMapping("/api/companies")
 public class CompanyController {
 
     private final ICompanyService companyService;
+    private final Gson gson;
 
-    public CompanyController(ICompanyService companyService) {
+    public CompanyController(ICompanyService companyService, Gson gson) {
         this.companyService = companyService;
+        this.gson = gson;
     }
 
-    Gson gson = new Gson();
-
-    @GetMapping(value = "/companies")
+    @Operation(summary = "Get all companies")
+    @GetMapping
     public ResponseEntity<String> getAllCompanies() {
         List<Company> companies = companyService.getAllCompanies();
         String jsonString = gson.toJson(companies);
         return ResponseEntity.ok(jsonString);
     }
 
-    @PostMapping(value = "/newCompany")
-    public ResponseEntity<String> createCompany(@Valid Company company, BindingResult bindingResult) {
+    @Operation(summary = "Create a new company")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully created company"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data")
+    })
+    @PostMapping("/new")
+    public ResponseEntity<String> createCompany(@Valid @RequestBody Company company, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            StringBuilder errorMessage = new StringBuilder("Error when trying to create company, invalid company:  ");
+            StringBuilder errorMessage = new StringBuilder("Error when trying to create company: ");
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMessage.append(error.getDefaultMessage()).append(" ");
             }
@@ -44,10 +53,16 @@ public class CompanyController {
         return ResponseEntity.ok(jsonString);
     }
 
-    @PutMapping(value = "/company/{id}")
+    @Operation(summary = "Update an existing company")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated company"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Company not found")
+    })
+    @PutMapping("/{id}")
     public ResponseEntity<String> updateCompany(@PathVariable Long id, @Valid @RequestBody Company company, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            StringBuilder errorMessage = new StringBuilder("Error when trying to update company:  ");
+            StringBuilder errorMessage = new StringBuilder("Error when trying to update company: ");
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMessage.append(error.getDefaultMessage()).append(" ");
             }
@@ -56,16 +71,23 @@ public class CompanyController {
 
         company.setId(id);
 
-        int updateCompany = companyService.updateCompany(company);
+        int updated = companyService.updateCompany(company);
 
-        if (updateCompany == 0) return ResponseEntity.notFound().build();
+        if (updated == 0) {
+            return ResponseEntity.notFound().build();
+        }
 
-        Company companyUpdated = companyService.getCompanyById(id);
-        String jsonString = gson.toJson(companyUpdated);
+        Company updatedCompany = companyService.getCompanyById(id);
+        String jsonString = gson.toJson(updatedCompany);
         return ResponseEntity.ok(jsonString);
     }
 
-    @GetMapping(value = "/company/{id}")
+    @Operation(summary = "Get a company by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved company"),
+            @ApiResponse(responseCode = "404", description = "Company not found")
+    })
+    @GetMapping("/{id}")
     public ResponseEntity<String> getCompanyById(@PathVariable Long id) {
         Company company = companyService.getCompanyById(id);
         if (company == null) {
@@ -75,13 +97,14 @@ public class CompanyController {
         return ResponseEntity.ok(jsonString);
     }
 
-    @DeleteMapping("/deleteCompany/{id}")
+    @Operation(summary = "Delete a company")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted company"),
+            @ApiResponse(responseCode = "400", description = "Failed to delete company")
+    })
+    @DeleteMapping("/{id}")
     public ResponseEntity<Boolean> deleteCompany(@PathVariable Long id) {
-        boolean ret = companyService.deleteCompany(id);
-        if (!ret) {
-            return ResponseEntity.badRequest().body(false);
-        } else {
-            return ResponseEntity.ok(true);
-        }
+        boolean deleted = companyService.deleteCompany(id);
+        return deleted ? ResponseEntity.ok(true) : ResponseEntity.badRequest().body(false);
     }
 }

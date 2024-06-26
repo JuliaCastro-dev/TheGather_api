@@ -10,4 +10,5 @@ public interface ICompanyDAO {
     List<Company> getAllCompanies();
     int updateCompany(Company company);
     Company getCompanyById(long id);
+    Company getLastCompany();
 }

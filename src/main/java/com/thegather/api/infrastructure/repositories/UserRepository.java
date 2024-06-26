@@ -3,6 +3,7 @@ package com.thegather.api.infrastructure.repositories;
 import com.thegather.api.domain.entities.User;
 import com.thegather.api.domain.interfaces.repositories.IUserRepo;
 import com.thegather.api.domain.interfaces.dao.IUserDAO;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

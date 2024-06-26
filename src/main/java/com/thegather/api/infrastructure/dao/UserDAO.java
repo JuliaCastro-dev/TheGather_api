@@ -3,28 +3,25 @@ package com.thegather.api.infrastructure.dao;
 import com.thegather.api.domain.entities.User;
 import com.thegather.api.domain.interfaces.dao.IUserDAO;
 import com.thegather.api.infrastructure.DbContext;
-import org.springframework.context.annotation.Bean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.sql.Types.NULL;
-
 @Component
 public class UserDAO implements IUserDAO {
-    @Override
-    public User createUser(User user)   {
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
+    private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
 
-        try {
-            connection = DbContext.getConnection();
-            String sql = "INSERT INTO USERS (NAME, EMAIL, PASSWORD, ADDRESS, PHONE, CEP, CPF, OFFICE, COMPANY_ID) VALUES (?,?,?,?,?,?,?,?,?)";
-            statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+    @Override
+    public User createUser(User user) {
+        String sql = "INSERT INTO USERS (NAME, EMAIL, PASSWORD, ADDRESS, PHONE, CEP, CPF, OFFICE, COMPANY_ID) VALUES (?,?,?,?,?,?,?,?,?)";
+
+        try (Connection connection = DbContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             statement.setString(1, user.getName());
             statement.setString(2, user.getEmail());
             statement.setString(3, user.getPassword());
@@ -38,10 +35,11 @@ public class UserDAO implements IUserDAO {
             int rowsAffected = statement.executeUpdate();
 
             if (rowsAffected == 1) {
-                resultSet = statement.getGeneratedKeys();
-                if (resultSet.next()) {
-                    long userId = resultSet.getLong(1);
-                    user.setId(userId);
+                try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                    if (resultSet.next()) {
+                        long userId = resultSet.getLong(1);
+                        user.setId(userId);
+                    }
                 }
                 return user;
             } else {
@@ -49,29 +47,20 @@ public class UserDAO implements IUserDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error creating user: {}", user, e);
             return null;
-        } finally {
-            try {
-                if (resultSet != null) resultSet.close();
-                if (statement != null) statement.close();
-                if (connection != null) connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     @Override
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        Connection connection = DbContext.getConnection();
-        Statement statement = null;
-        ResultSet resultSet = null;
+        String sql = "SELECT * FROM USERS";
 
-        try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery("SELECT * FROM USERS");
+        try (Connection connection = DbContext.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(sql)) {
+
             while (resultSet.next()) {
                 User user = new User(resultSet.getLong("ID"),
                         resultSet.getString("NAME"),
@@ -86,28 +75,20 @@ public class UserDAO implements IUserDAO {
                 users.add(user);
             }
 
+        } catch (SQLException e) {
+            logger.error("Error retrieving all users", e);
         }
-        catch (SQLException e) {
-            e.printStackTrace();
 
-        }finally {
-            return users;
-        }
+        return users;
     }
 
     @Override
     public int updateUser(User user) {
-        Connection connection = null;
-        PreparedStatement statement = null;
+        String sql = "UPDATE USERS SET NAME = ?, EMAIL = ?, PASSWORD = ?, ADDRESS = ?, PHONE = ?, CEP = ?, CPF = ?, OFFICE = ?, COMPANY_ID = ? WHERE ID = ?";
 
-        try {
-            connection = DbContext.getConnection();
+        try (Connection connection = DbContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            String sql = "UPDATE USERS " +
-                    "SET NAME = ?, EMAIL = ?, PASSWORD = ?, ADDRESS = ?, PHONE = ?, CEP = ?, CPF = ?, OFFICE = ?, COMPANY_ID = ?" +
-                    " WHERE ID = ?";
-
-            statement = connection.prepareStatement(sql);
             statement.setString(1, user.getName());
             statement.setString(2, user.getEmail());
             statement.setString(3, user.getPassword());
@@ -119,102 +100,90 @@ public class UserDAO implements IUserDAO {
             statement.setInt(9, user.getCompany_id());
             statement.setLong(10, user.getId());
 
-            int rowsUpdated = statement.executeUpdate();
-
-            return rowsUpdated;
+            return statement.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error updating user: {}", user, e);
             return 0;
-        } finally {
-            try {
-                if (statement != null) statement.close();
-                if (connection != null) connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     @Override
     public User getUserById(long id) {
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        User user = null;
-        try {
-            connection = DbContext.getConnection();
-            statement = connection.prepareStatement("SELECT * FROM USERS");
-            resultSet = statement.executeQuery();
+        String sql = "SELECT * FROM USERS WHERE ID = ?";
 
-            if (resultSet.next()) {
-                user =   new User(resultSet.getLong("ID"),
-                        resultSet.getString("NAME"),
-                        resultSet.getString("EMAIL"),
-                        resultSet.getString("PASSWORD"),
-                        resultSet.getString("ADDRESS"),
-                        resultSet.getString("PHONE"),
-                        resultSet.getString("CEP"),
-                        resultSet.getString("CPF"),
-                        resultSet.getInt("OFFICE"),
-                        resultSet.getInt("COMPANY_ID"));
-            }
+        try (Connection connection = DbContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return user;
-    }
+            statement.setLong(1, id);
 
-    public User getUserByEmail(String email) {
-        User user = null;
-        try {
-            Connection connection = DbContext.getConnection();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("SELECT * FROM USERS WHERE EMAIL = " + email);
-            if (resultSet.next()) {
-                user =   new User(resultSet.getLong("ID"),
-                        resultSet.getString("NAME"),
-                        resultSet.getString("EMAIL"),
-                        resultSet.getString("PASSWORD"),
-                        resultSet.getString("ADDRESS"),
-                        resultSet.getString("PHONE"),
-                        resultSet.getString("CEP"),
-                        resultSet.getString("CPF"),
-                        resultSet.getInt("OFFICE"),
-                        resultSet.getInt("COMPANY_ID"));
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new User(resultSet.getLong("ID"),
+                            resultSet.getString("NAME"),
+                            resultSet.getString("EMAIL"),
+                            resultSet.getString("PASSWORD"),
+                            resultSet.getString("ADDRESS"),
+                            resultSet.getString("PHONE"),
+                            resultSet.getString("CEP"),
+                            resultSet.getString("CPF"),
+                            resultSet.getInt("OFFICE"),
+                            resultSet.getInt("COMPANY_ID"));
+                }
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Cannot get a user with this email", e.getCause());
-        }finally {
-            return user;
+            logger.error("Error retrieving user by ID: {}", id, e);
         }
+
+        return null;
+    }
+
+    public User getUserByEmail(String email) {
+        String sql = "SELECT * FROM USERS WHERE EMAIL = ?";
+
+        try (Connection connection = DbContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, email);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new User(resultSet.getLong("ID"),
+                            resultSet.getString("NAME"),
+                            resultSet.getString("EMAIL"),
+                            resultSet.getString("PASSWORD"),
+                            resultSet.getString("ADDRESS"),
+                            resultSet.getString("PHONE"),
+                            resultSet.getString("CEP"),
+                            resultSet.getString("CPF"),
+                            resultSet.getInt("OFFICE"),
+                            resultSet.getInt("COMPANY_ID"));
+                }
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error retrieving user by email: {}", email, e);
+        }
+
+        return null;
     }
 
     @Override
     public boolean deleteUser(Long id) {
-        Connection connection = null;
-        PreparedStatement statement = null;
+        String sql = "DELETE FROM USERS WHERE ID = ?";
 
-        try {
-            connection = DbContext.getConnection();
+        try (Connection connection = DbContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement = connection.prepareStatement("delete from USERS where ID = ?");
             statement.setLong(1, id);
 
             int rowsAffected = statement.executeUpdate();
 
-            if (rowsAffected == 1) {
-                return true;
-            } else if (rowsAffected == 0) {
-                return false;
-            } else {
-                return false;
-            }
+            return rowsAffected == 1;
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error deleting user with ID: {}", id, e);
             return false;
         }
     }

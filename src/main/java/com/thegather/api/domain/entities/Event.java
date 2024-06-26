@@ -3,65 +3,66 @@ package com.thegather.api.domain.entities;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-
+import java.util.Optional;
+@Entity
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     @Column(nullable = false)
-    public int creator;
+    private int creator;
 
     @Column(nullable = false)
-    public int company;
+    private int company;
 
     @Column(nullable = false)
-    public boolean is_private;
+    private boolean is_private;
 
     @Column(nullable = false)
-    public boolean notification_whats;
+    private boolean notification_whats;
 
     @Column(nullable = false)
-    public boolean notification_email;
+    private boolean notification_email;
 
     @Column(nullable = false)
-    public boolean notification_sms;
+    private boolean notification_sms;
 
     @Column(nullable = false, length = 255)
-    public String title;
+    private String title;
 
-    @Column(nullable = false, length = 255)
-    public String image;
-
-    @Column(nullable = false)
-    @Temporal(TemporalType.DATE)
-    public LocalDate event_date;
-
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIME)
-    public LocalTime event_time;
+    @Column(nullable = true, length = 255)  // Image can also be optional
+    private String image;
 
     @Column(nullable = false)
     @Temporal(TemporalType.DATE)
-    public LocalDate date_start;
+    private LocalDate event_date;
 
     @Column(nullable = false)
     @Temporal(TemporalType.TIME)
-    public LocalTime time_start;
+    private LocalTime event_time;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Temporal(TemporalType.DATE)
-    public LocalDate date_end;
+    private LocalDate date_start;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Temporal(TemporalType.TIME)
-    public LocalDate time_end;
+    private LocalTime time_start;
 
-    @Column(nullable = false)
-    public String link;
+    @Column(nullable = true)
+    @Temporal(TemporalType.DATE)
+    private LocalDate date_end;
+
+    @Column(nullable = true)
+    @Temporal(TemporalType.TIME)
+    private LocalTime time_end;
+
+    @Column(nullable = true, length = 255)
+    private String link;
 
     @Column(length = 255)
-    public String description;
+    private String description;
 
     public Long getId() {
         return id;
@@ -87,7 +88,7 @@ public class Event {
         this.company = company;
     }
 
-    public boolean getIs_private() {
+    public boolean isIs_private() {
         return is_private;
     }
 
@@ -175,11 +176,11 @@ public class Event {
         this.date_end = date_end;
     }
 
-    public LocalDate getTime_end() {
+    public LocalTime getTime_end() {
         return time_end;
     }
 
-    public void setTime_end(LocalDate time_end) {
+    public void setTime_end(LocalTime time_end) {
         this.time_end = time_end;
     }
 
@@ -196,6 +197,26 @@ public class Event {
     }
 
     public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Event(Long id, int creator, int company, boolean is_private, boolean notification_whats, boolean notification_email, boolean notification_sms, String title, String image, LocalDate event_date, LocalTime event_time, Optional<LocalDate> date_start, Optional<LocalTime> time_start, Optional<LocalDate> date_end, Optional<LocalTime> time_end, Optional<String> link, String description) {
+        this.id = id;
+        this.creator = creator;
+        this.company = company;
+        this.is_private = is_private;
+        this.notification_whats = notification_whats;
+        this.notification_email = notification_email;
+        this.notification_sms = notification_sms;
+        this.title = title;
+        this.image = image;
+        this.event_date = event_date;
+        this.event_time = event_time;
+        this.date_start = date_start.orElse(null);
+        this.time_start = time_start.orElse(null);
+        this.date_end = date_end.orElse(null);
+        this.time_end = time_end.orElse(null);
+        this.link = link.orElse(null);
         this.description = description;
     }
 }

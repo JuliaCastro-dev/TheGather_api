@@ -10,4 +10,5 @@ public interface ICompanyService {
     List<Company> getAllCompanies();
     int updateCompany(Company company);
     Company getCompanyById(long id);
+    Company getLastCompany();
 }

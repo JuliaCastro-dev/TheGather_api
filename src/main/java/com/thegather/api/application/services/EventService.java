@@ -21,7 +21,7 @@ public class EventService implements IEventService {
     }
 
     @Override
-    public int updateEvent(Event event) throws SQLException {
+    public int updateEvent(Event event) {
         return repository.updateEvent(event);
     }
 

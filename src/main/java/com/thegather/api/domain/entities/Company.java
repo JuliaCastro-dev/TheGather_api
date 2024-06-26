@@ -2,38 +2,39 @@ package com.thegather.api.domain.entities;
 
 
 import jakarta.persistence.*;
-
+@Entity
 public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    @Column(name = "ID", unique = true, updatable = false)
+    private Long id;
 
     @Column(nullable = false)
-    public int creator;
+    private int creator;
 
     @Column(nullable = false, length = 255)
-    public String name;
+    private String name;
 
     @Column(nullable = false, length = 255)
-    public String corporate_name;
+    private String corporate_name;
 
     @Column(nullable = false, length = 255)
-    public String segment;
+    private String segment;
 
     @Column(nullable = false, length = 255)
-    public String link;
+    private String link;
 
     @Column(nullable = false, length = 255)
-    public String address;
+    private String address;
 
     @Column(nullable = false, length = 20)
-    public String phone;
+    private String phone;
 
     @Column(nullable = false, length = 8)
-    public String CEP;
+    private String CEP;
 
     @Column(nullable = false, length = 14)
-    public String CNPJ;
+    private String CNPJ;
 
     public Long getId() {
         return id;

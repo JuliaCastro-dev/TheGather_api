@@ -11,6 +11,7 @@ public class CompanyRepository implements ICompanyRepo {
 
     private final CompanyDAO companyDAO;
 
+
     public CompanyRepository(CompanyDAO companyDAO) {
         this.companyDAO = companyDAO;
     }
@@ -38,5 +39,10 @@ public class CompanyRepository implements ICompanyRepo {
     @Override
     public Company getCompanyById(long id) {
         return companyDAO.getCompanyById(id);
+    }
+
+    @Override
+    public Company getLastCompany() {
+      return companyDAO.getLastCompany();
     }
 }

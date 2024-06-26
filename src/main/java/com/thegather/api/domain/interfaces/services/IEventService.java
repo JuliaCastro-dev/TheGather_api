@@ -8,7 +8,7 @@ public interface IEventService {
     List<Event> getAllEvents();
     Event createEvent(Event event);
 
-    int updateEvent(Event event) throws SQLException;
+    int updateEvent(Event event);
 
     Event getEventById(Long id);
 

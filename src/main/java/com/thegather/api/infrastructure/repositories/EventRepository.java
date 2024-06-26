@@ -23,7 +23,7 @@ public class EventRepository implements IEventRepo {
     }
 
     @Override
-    public int updateEvent(Event event) throws SQLException {
+    public int updateEvent(Event event) {
         return eventDAO.updateEvent(event);
     }
 

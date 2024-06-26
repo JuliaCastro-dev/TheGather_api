@@ -5,10 +5,9 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "USERS")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
+    @Column(name = "ID", unique = true, updatable = false)
     private Long id;
 
     @Column(nullable = false, length = 255, name = "NAME")
@@ -130,4 +129,6 @@ public class User {
         this.company_id = company_id;
     }
 
+    public User() {
+    }
 }

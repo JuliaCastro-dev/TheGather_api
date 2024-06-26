@@ -7,7 +7,7 @@ import java.util.List;
 public interface IEventRepo {
     List<Event> getAllEvents();
     Event createEvent(Event event);
-    int updateEvent(Event event) throws SQLException;
+    int updateEvent(Event event);
     Event getEventById(long id);
     boolean deleteEventById(long id);
 }

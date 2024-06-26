@@ -38,4 +38,9 @@ public class CompanyService implements ICompanyService {
     public Company getCompanyById(long id) {
         return companyRepo.getCompanyById(id);
     }
+
+    @Override
+    public Company getLastCompany() {
+        return companyRepo.getLastCompany();
+    }
 }
