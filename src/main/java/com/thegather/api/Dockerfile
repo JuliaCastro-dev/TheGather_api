@@ -8,7 +8,7 @@ RUN chmod +x ./mvnw && ./mvnw -DoutputFile=target/mvn-dependency-list.log -B -Ds
 
 # Use uma imagem base do JRE 21 para o runtime
 FROM openjdk:21-jre-slim as runtime
-WORKDIR /app
+WORKDIR /api
 COPY --from=build /api/target/*.jar /api/api.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
