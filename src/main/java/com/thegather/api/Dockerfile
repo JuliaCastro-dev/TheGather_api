@@ -1,12 +1,14 @@
-FROM eclipse-temurin:21-jdk as build
+# Use uma imagem base do JDK 21 para o build
+FROM openjdk:21-jdk-slim as build
 
 # build phase
-COPY . /api/.
+COPY . /api
 WORKDIR /api
 RUN chmod +x ./mvnw && ./mvnw -DoutputFile=target/mvn-dependency-list.log -B -DskipTests clean dependency:list install
 
-FROM eclipse-temurin:21-jre as runtime
+# Use uma imagem base do JRE 21 para o runtime
+FROM openjdk:21-jre-slim as runtime
 WORKDIR /app
-COPY --from=build /api/target/*.jar /api/app.jar
+COPY --from=build /api/target/*.jar /api/api.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
