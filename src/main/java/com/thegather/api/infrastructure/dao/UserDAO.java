@@ -1,5 +1,6 @@
 package com.thegather.api.infrastructure.dao;
 
+import com.thegather.api.domain.entities.Company;
 import com.thegather.api.domain.entities.User;
 import com.thegather.api.domain.interfaces.dao.IUserDAO;
 import com.thegather.api.infrastructure.DbContext;
@@ -14,6 +15,32 @@ import java.util.List;
 @Component
 public class UserDAO implements IUserDAO {
     private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
+    private static final String SELECT_LAST = "SELECT * FROM USERS WHERE ID = (select max(ID) from USERS)";
+
+    @Override
+    public User getLastUser() {
+        User user = null;
+        try (Connection connection = DbContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_LAST);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+               user = new User(resultSet.getLong("ID"),
+                        resultSet.getString("NAME"),
+                        resultSet.getString("EMAIL"),
+                        resultSet.getString("PASSWORD"),
+                        resultSet.getString("ADDRESS"),
+                        resultSet.getString("PHONE"),
+                        resultSet.getString("CEP"),
+                        resultSet.getString("CPF"),
+                        resultSet.getInt("OFFICE"),
+                        resultSet.getInt("COMPANY_ID"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
 
     @Override
     public User createUser(User user) {
@@ -35,21 +62,14 @@ public class UserDAO implements IUserDAO {
             int rowsAffected = statement.executeUpdate();
 
             if (rowsAffected == 1) {
-                try (ResultSet resultSet = statement.getGeneratedKeys()) {
-                    if (resultSet.next()) {
-                        long userId = resultSet.getLong(1);
-                        user.setId(userId);
-                    }
-                }
+                user = getLastUser();
                 return user;
-            } else {
-                return null;
             }
-
         } catch (SQLException e) {
             logger.error("Error creating user: {}", user, e);
             return null;
         }
+        return null;
     }
 
     @Override

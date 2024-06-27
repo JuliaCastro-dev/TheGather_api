@@ -13,4 +13,5 @@ public interface IEventService {
     Event getEventById(Long id);
 
     boolean deleteEvent(Long id);
+    Event getLastEvent();
 }

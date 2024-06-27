@@ -3,6 +3,8 @@ package com.thegather.api.infrastructure.dao;
 import com.thegather.api.domain.entities.Company;
 import com.thegather.api.domain.interfaces.dao.ICompanyDAO;
 import com.thegather.api.infrastructure.DbContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
@@ -11,7 +13,7 @@ import java.util.List;
 
 @Component
 public class CompanyDAO implements ICompanyDAO {
-
+    private static final Logger logger = LoggerFactory.getLogger(UserDAO.class);
     private static final String INSERT_SQL = "INSERT INTO COMPANY (NAME, ADDRESS, CEP, LINK, SEGMENT, CORPORATE_NAME, CNPJ, PHONE, CREATOR) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String DELETE_SQL = "DELETE FROM COMPANY WHERE ID = ?";
     private static final String SELECT_ALL_SQL = "SELECT * FROM COMPANY";
@@ -42,7 +44,7 @@ public class CompanyDAO implements ICompanyDAO {
                 return comp;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error creating company: {}", company, e);
         }
         return null;
     }

@@ -14,6 +14,11 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public User getLastUser() {
+        return userRepository.getLastUser();
+    }
+
+    @Override
     public User createUser(User user) {
         return userRepository.createUser(user);
     }

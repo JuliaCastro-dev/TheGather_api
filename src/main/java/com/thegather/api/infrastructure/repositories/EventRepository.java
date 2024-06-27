@@ -41,4 +41,9 @@ public class EventRepository implements IEventRepo {
     public boolean deleteEventById(long id) {
         return eventDAO.delete(id);
     }
+
+    @Override
+    public Event getLastEvent() {
+        return eventDAO.getLastEvent();
+    }
 }

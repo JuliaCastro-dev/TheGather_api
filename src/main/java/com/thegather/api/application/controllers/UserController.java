@@ -1,5 +1,6 @@
 package com.thegather.api.application.controllers;
 
+import com.google.gson.Gson;
 import com.thegather.api.domain.entities.User;
 import com.thegather.api.domain.interfaces.services.IUserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,9 +25,11 @@ import java.util.stream.Collectors;
 public class UserController {
 
     private final IUserService userService;
+    private final Gson gson;
 
-    public UserController(IUserService userService) {
+    public UserController(IUserService userService, Gson gson) {
         this.userService = userService;
+        this.gson = gson;
     }
 
     @Operation(summary = "Get all users", description = "Retrieve a list of all users")
@@ -62,7 +65,8 @@ public class UserController {
         }
 
         User savedUser = userService.createUser(user);
-        return ResponseEntity.ok(savedUser.toString());
+        String jsonString = gson.toJson(savedUser);
+        return ResponseEntity.ok(jsonString);
     }
 
     @Operation(summary = "Update an existing user", description = "Update user details by ID")

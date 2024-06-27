@@ -52,7 +52,8 @@ public class EventController {
         }
 
         Event savedEvent = eventService.createEvent(event);
-        return ResponseEntity.ok(gson.toJson(savedEvent));
+        String jsonString = gson.toJson(savedEvent);
+        return ResponseEntity.ok(gson.toJson(jsonString));
     }
 
     @Operation(summary = "Update an existing event", description = "Update event details by ID")

@@ -35,6 +35,11 @@ public class UserRepository implements IUserRepo {
     }
 
     @Override
+    public User getLastUser() {
+        return userDAO.getLastUser();
+    }
+
+    @Override
     public User getUserByEmail(String email) {
         return userDAO.getUserByEmail(email);
     }

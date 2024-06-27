@@ -1,5 +1,6 @@
 package com.thegather.api.domain.entities;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
 @Entity
@@ -8,6 +9,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", unique = true, updatable = false)
+    @Schema(hidden = true)
     private Long id;
 
     @Column(nullable = false, length = 255, name = "NAME")

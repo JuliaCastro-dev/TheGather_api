@@ -1,6 +1,7 @@
 package com.thegather.api.infrastructure.dao;
 
 import com.thegather.api.domain.entities.Event;
+import com.thegather.api.domain.entities.User;
 import com.thegather.api.domain.interfaces.dao.IEventDAO;
 import com.thegather.api.infrastructure.DbContext;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,47 @@ import java.util.Optional;
 @Component
 public class EventDAO implements IEventDAO {
     private static final Logger logger = LoggerFactory.getLogger(EventDAO.class);
+    private static final String SELECT_LAST = "SELECT * FROM EVENT WHERE ID = (select max(ID) from EVENT)";
+
+    private Event mappedEvent(ResultSet resultSet) throws SQLException {
+        Long idEvent = resultSet.getLong("ID");
+        int creator = resultSet.getInt("CREATOR");
+        int company = resultSet.getInt("COMPANY");
+        boolean is_private = resultSet.getBoolean("IS_PRIVATE");
+        boolean notification_whats = resultSet.getBoolean("NOTIFICATION_WHATS");
+        boolean notification_email = resultSet.getBoolean("NOTIFICATION_EMAIL");
+        boolean notification_sms = resultSet.getBoolean("NOTIFICATION_SMS");
+        String title = resultSet.getString("TITLE");
+        String image = resultSet.getString("IMAGE");
+        LocalDate event_date = resultSet.getDate("EVENT_DATE").toLocalDate();
+        LocalTime event_time = resultSet.getTime("EVENT_TIME").toLocalTime();
+
+        Optional<LocalDate> date_start = Optional.ofNullable(resultSet.getDate("DATE_START") != null ? resultSet.getDate("DATE_START").toLocalDate() : null);
+        Optional<LocalTime> time_start = Optional.ofNullable(resultSet.getTime("TIME_START") != null ? resultSet.getTime("TIME_START").toLocalTime() : null);
+        Optional<LocalDate> date_end = Optional.ofNullable(resultSet.getDate("DATE_END") != null ? resultSet.getDate("DATE_END").toLocalDate() : null);
+        Optional<LocalTime> time_end = Optional.ofNullable(resultSet.getTime("TIME_END") != null ? resultSet.getTime("TIME_END").toLocalTime() : null);
+        Optional<String> link = Optional.ofNullable(resultSet.getString("LINK"));
+
+        return new Event(idEvent, creator, company, is_private, notification_whats, notification_email, notification_sms, title, image, event_date, event_time, date_start, time_start, date_end, time_end, link, resultSet.getString("DESCRIPTION"));
+    }
+
+    @Override
+    public Event getLastEvent() {
+        Event event = null;
+        try (Connection connection = DbContext.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_LAST);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                event = mappedEvent(resultSet);
+            }
+        } catch (SQLException e) {
+            logger.error("Error creating Event: {}", event, e);
+            return null;
+        }
+        return event;
+    }
+
     @Override
     public Event createEvent(Event event) {
         String sql = "INSERT INTO EVENT (TITLE, DESCRIPTION, EVENT_DATE, EVENT_TIME, IMAGE, CREATOR, COMPANY, IS_PRIVATE, NOTIFICATION_WHATS, NOTIFICATION_EMAIL, NOTIFICATION_SMS, DATE_START, TIME_START, DATE_END, TIME_END, LINK) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
@@ -105,27 +147,7 @@ public class EventDAO implements IEventDAO {
         }
     }
 
-    private Event mappedEvent(ResultSet resultSet) throws SQLException {
-        Long idEvent = resultSet.getLong("ID");
-        int creator = resultSet.getInt("CREATOR");
-        int company = resultSet.getInt("COMPANY");
-        boolean is_private = resultSet.getBoolean("IS_PRIVATE");
-        boolean notification_whats = resultSet.getBoolean("NOTIFICATION_WHATS");
-        boolean notification_email = resultSet.getBoolean("NOTIFICATION_EMAIL");
-        boolean notification_sms = resultSet.getBoolean("NOTIFICATION_SMS");
-        String title = resultSet.getString("TITLE");
-        String image = resultSet.getString("IMAGE");
-        LocalDate event_date = resultSet.getDate("EVENT_DATE").toLocalDate();
-        LocalTime event_time = resultSet.getTime("EVENT_TIME").toLocalTime();
 
-        Optional<LocalDate> date_start = Optional.ofNullable(resultSet.getDate("DATE_START") != null ? resultSet.getDate("DATE_START").toLocalDate() : null);
-        Optional<LocalTime> time_start = Optional.ofNullable(resultSet.getTime("TIME_START") != null ? resultSet.getTime("TIME_START").toLocalTime() : null);
-        Optional<LocalDate> date_end = Optional.ofNullable(resultSet.getDate("DATE_END") != null ? resultSet.getDate("DATE_END").toLocalDate() : null);
-        Optional<LocalTime> time_end = Optional.ofNullable(resultSet.getTime("TIME_END") != null ? resultSet.getTime("TIME_END").toLocalTime() : null);
-        Optional<String> link = Optional.ofNullable(resultSet.getString("LINK"));
-
-        return new Event(idEvent, creator, company, is_private, notification_whats, notification_email, notification_sms, title, image, event_date, event_time, date_start, time_start, date_end, time_end, link, resultSet.getString("DESCRIPTION"));
-    }
 
     @Override
     public int updateEvent(Event event) {
@@ -197,8 +219,7 @@ public class EventDAO implements IEventDAO {
             while (resultSet.next()) {
                 events.add(mappedEvent(resultSet));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException e) {  logger.error("Error get all events Event: {0}", e);
         }
         return events;
     }
@@ -216,7 +237,7 @@ public class EventDAO implements IEventDAO {
 
             return rowsAffected == 1;
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error deleted Event: {0}", e);
             return false;
         }
     }

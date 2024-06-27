@@ -10,4 +10,5 @@ public interface IEventRepo {
     int updateEvent(Event event);
     Event getEventById(long id);
     boolean deleteEventById(long id);
+    Event getLastEvent();
 }

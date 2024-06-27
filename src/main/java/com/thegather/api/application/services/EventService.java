@@ -39,4 +39,9 @@ public class EventService implements IEventService {
     public boolean deleteEvent(Long id) {
         return repository.deleteEventById(id);
     }
+
+    @Override
+    public Event getLastEvent() {
+        return repository.getLastEvent();
+    }
 }

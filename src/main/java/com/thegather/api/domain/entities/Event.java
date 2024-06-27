@@ -1,5 +1,7 @@
 package com.thegather.api.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -8,6 +10,7 @@ import java.util.Optional;
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Schema(hidden = true)
     private Long id;
 
     @Column(nullable = false)
@@ -39,7 +42,8 @@ public class Event {
     private LocalDate event_date;
 
     @Column(nullable = false)
-    @Temporal(TemporalType.TIME)
+    @Schema(type = "string", pattern = "HH:mm:ss", example = "22:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime event_time;
 
     @Column(nullable = true)
@@ -47,7 +51,8 @@ public class Event {
     private LocalDate date_start;
 
     @Column(nullable = true)
-    @Temporal(TemporalType.TIME)
+    @Schema(type = "string", pattern = "HH:mm:ss", example = "22:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime time_start;
 
     @Column(nullable = true)
@@ -55,7 +60,8 @@ public class Event {
     private LocalDate date_end;
 
     @Column(nullable = true)
-    @Temporal(TemporalType.TIME)
+    @Schema(type = "string", pattern = "HH:mm:ss", example = "22:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime time_end;
 
     @Column(nullable = true, length = 255)
@@ -198,6 +204,9 @@ public class Event {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Event() {
     }
 
     public Event(Long id, int creator, int company, boolean is_private, boolean notification_whats, boolean notification_email, boolean notification_sms, String title, String image, LocalDate event_date, LocalTime event_time, Optional<LocalDate> date_start, Optional<LocalTime> time_start, Optional<LocalDate> date_end, Optional<LocalTime> time_end, Optional<String> link, String description) {

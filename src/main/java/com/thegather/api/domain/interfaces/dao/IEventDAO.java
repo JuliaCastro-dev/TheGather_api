@@ -8,6 +8,6 @@ public interface IEventDAO {
     int updateEvent(Event event);
     List<Event> getAllEvents();
     Event getById(Long id);
-
+    Event getLastEvent();
     Boolean delete(Long id);
 }
